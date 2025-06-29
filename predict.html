@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Readmission Risk Predictor</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 25px 30px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fdfdfd;
+      box-shadow: 0px 0px 8px #e0e0e0;
+    }
+
+    h2 {
+      color: #0078d4;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      margin-top: 5px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 25px;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #333;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Predict Readmission Risk</h2>
+  <form id="predictionForm">
+    <label for="feature1">Feature 1</label>
+    <input type="number" name="feature1" required />
+
+    <label for="feature2">Feature 2</label>
+    <input type="number" name="feature2" step="0.01" required />
+
+    <label for="feature3">Feature 3</label>
+    <input type="number" name="feature3" required />
+
+    <button type="submit">Predict</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("predictionForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      // Convert all values to numbers to avoid string issues
+      for (let key in payload) {
+        payload[key] = parseFloat(payload[key]);
+      }
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.prediction !== undefined) {
+          document.getElementById("result").textContent =
+            "Prediction: " + data.prediction;
+        } else {
+          document.getElementById("result").textContent = "Error: No response received";
+        }
+      } catch (error) {
+        document.getElementById("result").textContent = "⚠️ Could not connect to API.";
+        console.error("Error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
